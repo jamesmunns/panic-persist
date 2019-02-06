@@ -1,0 +1,16 @@
+[package]
+edition = "2018"
+authors = [
+    "Daniel Egger <daniel@eggers-club.de>",
+]
+categories = ["no-std"]
+description = "Keep panic messages in the targets' RAM"
+documentation = "https://docs.rs/panic-ramdump"
+keywords = ["panic-handler", "panic-impl", "panic", "ramdump"]
+license = "MIT OR Apache-2.0"
+name = "panic-ramdump"
+repository = "https://github.com/therealprof/panic-ramdump"
+version = "0.1.0"
+
+[dependencies]
+cortex-m = "0.5.8"
