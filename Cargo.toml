@@ -15,3 +15,7 @@ readme = "README.md"
 
 [dependencies]
 cortex-m = "0.6.0"
+
+[features]
+default = []
+utf8 = []

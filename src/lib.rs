@@ -33,10 +33,10 @@
 #![deny(warnings)]
 #![no_std]
 
-use core::fmt::Write;
-use core::panic::PanicInfo;
-use core::mem::size_of;
 use core::cmp::min;
+use core::fmt::Write;
+use core::mem::size_of;
+use core::panic::PanicInfo;
 
 use cortex_m::interrupt;
 
@@ -59,8 +59,8 @@ impl core::fmt::Write for Ram {
 
         // Obtain info about the panic dump region
         let start_ptr = unsafe { &mut _panic_dump_start as *mut u8 };
-        let end_ptr   = unsafe { &mut _panic_dump_end as *mut u8 };
-        let max_len   = end_ptr as usize - start_ptr as usize;
+        let end_ptr = unsafe { &mut _panic_dump_end as *mut u8 };
+        let max_len = end_ptr as usize - start_ptr as usize;
         let max_len_str = max_len - size_of::<usize>() - size_of::<usize>();
 
         // If we have written the full length of the region, we can't write any
@@ -75,14 +75,12 @@ impl core::fmt::Write for Ram {
 
         unsafe {
             // Write the magic word for later detection
-            start_ptr
-                .cast::<usize>()
-                .write(0x0FACADE0);
+            start_ptr.cast::<usize>().write_unaligned(0x0FACADE0);
 
             // For now, skip writing the length...
 
             // Write the string to RAM
-            core::ptr::copy_nonoverlapping(
+            core::ptr::copy(
                 data.as_ptr() as *mut u8,
                 start_ptr.offset(8).offset(self.offset as isize),
                 str_len,
@@ -95,15 +93,21 @@ impl core::fmt::Write for Ram {
             start_ptr
                 .offset(4)
                 .cast::<usize>()
-                .write(self.offset);
+                .write_unaligned(self.offset);
         };
 
         Ok(())
     }
 }
 
-/// Get the panic message from the last boot, if any
-pub fn get_panic_message() -> Option<&'static str> {
+/// Get the panic message from the last boot, if any.
+/// This method may possibly not return valid UTF-8 if the message
+/// was truncated before the end of a full UTF-8 character. Care must
+/// be taken before treating this as a proper &str.
+///
+/// If a message existed, this function will only return the value once
+/// (subsequent calls will return None)
+pub fn get_panic_message_bytes() -> Option<&'static [u8]> {
     // Obtain panic region start and end from linker symbol _panic_dump_start and _panic_dump_end
     extern "C" {
         static mut _panic_dump_start: u8;
@@ -112,28 +116,57 @@ pub fn get_panic_message() -> Option<&'static str> {
 
     let start_ptr = unsafe { &mut _panic_dump_start as *mut u8 };
 
-    if 0x0FACADE0 != unsafe { core::ptr::read(start_ptr.cast::<usize>()) } {
+    if 0x0FACADE0 != unsafe { core::ptr::read_unaligned(start_ptr.cast::<usize>()) } {
         return None;
     }
 
+    // Clear the magic word to prevent this message from "sticking"
+    // across multiple boots
+    unsafe {
+        start_ptr.cast::<usize>().write_unaligned(0x00000000);
+    }
+
     // Obtain info about the panic dump region
-    let end_ptr   = unsafe { &mut _panic_dump_end as *mut u8 };
-    let max_len   = end_ptr as usize - start_ptr as usize;
+    let end_ptr = unsafe { &mut _panic_dump_end as *mut u8 };
+    let max_len = end_ptr as usize - start_ptr as usize;
     let max_len_str = max_len - size_of::<usize>() - size_of::<usize>();
 
-    let len = unsafe { core::ptr::read(start_ptr.offset(4).cast::<usize>()) };
+    let len = unsafe { core::ptr::read_unaligned(start_ptr.offset(4).cast::<usize>()) };
 
     if len > max_len_str {
         return None;
     }
 
     // TODO: This is prooooooooobably undefined behavior
-    let byte_slice = unsafe { core::slice::from_raw_parts(
-        start_ptr.offset(8),
-        len
-    )};
+    let byte_slice = unsafe { core::slice::from_raw_parts(start_ptr.offset(8), len) };
 
-    Some(unsafe { core::str::from_utf8_unchecked(byte_slice) })
+    Some(byte_slice)
+}
+
+/// Get the panic message from the last boot, if any. If any invalid
+/// UTF-8 characters occur, the message will be truncated before the
+/// first error.
+///
+/// If a message existed, this function will only return the value once
+/// (subsequent calls will return None)
+#[cfg(feature = "utf8")]
+pub fn get_panic_message_utf8() -> Option<&'static str> {
+    let bytes = get_panic_message_bytes()?;
+
+    use core::str::from_utf8;
+
+    match from_utf8(bytes) {
+        Ok(stir) => Some(stir),
+        Err(utf_err) => {
+            match from_utf8(&bytes[..utf_err.valid_up_to()]) {
+                Ok(stir) => Some(stir),
+                Err(_) => {
+                    // This shouldn't be possible...
+                    None
+                }
+            }
+        }
+    }
 }
 
 #[panic_handler]
