@@ -1,16 +1,17 @@
 [package]
 edition = "2018"
 authors = [
+    "James Munns <james.munns@ferrous-systems.com>",
     "Daniel Egger <daniel@eggers-club.de>",
 ]
 categories = ["embedded", "no-std"]
-description = "Keep panic messages in the targets' RAM"
-documentation = "https://docs.rs/panic-ramdump"
-keywords = ["panic-handler", "panic-impl", "panic", "ramdump"]
+description = "Persist panic messages in the targets' RAM"
+documentation = "https://docs.rs/panic-persist"
+keywords = ["panic-handler", "panic-impl", "panic", "persist"]
 license = "MIT OR Apache-2.0"
-name = "panic-ramdump"
-repository = "https://github.com/therealprof/panic-ramdump"
-version = "0.1.1"
+name = "panic-persist"
+repository = "https://github.com/jamesmunns/panic-persist"
+version = "0.2.0"
 readme = "README.md"
 
 [dependencies]
