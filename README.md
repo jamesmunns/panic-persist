@@ -6,6 +6,8 @@ This crate contains an implementation of `panic_fmt` that logs panic messages to
 RAM defined by the user, so that these messages can be retrieved on next boot, and handled
 outside of panic context, by sending to a logging interface, writing to flash, etc.
 
+After logging the message to RAM, the device will be soft-reset automatically.
+
 Unlike other methods this allows to discover the panic reason post-mortem using normal program
 control flow.
 
@@ -27,7 +29,7 @@ zeroing or otherwise modifying these sections on boot.
 
 `memory.x` file before modification:
 
-``` ignore
+```text
 MEMORY
 {
   /* NOTE K = KiBi = 1024 bytes */
@@ -38,7 +40,7 @@ MEMORY
 
 `memory.x` file after modification to hold a 1K region:
 
-``` ignore
+```text
 MEMORY
 {
   /* NOTE K = KiBi = 1024 bytes */
@@ -54,7 +56,7 @@ _panic_dump_end   = ORIGIN(PANDUMP) + LENGTH(PANDUMP);
 
 ### Program Usage Example
 
-``` ignore
+```rust
 #![no_std]
 
 use panic_persist as _;

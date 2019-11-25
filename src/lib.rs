@@ -6,6 +6,8 @@
 //! RAM defined by the user, so that these messages can be retrieved on next boot, and handled
 //! outside of panic context, by sending to a logging interface, writing to flash, etc.
 //!
+//! After logging the message to RAM, the device will be soft-reset automatically.
+//!
 //! Unlike other methods this allows to discover the panic reason post-mortem using normal program
 //! control flow.
 //!
