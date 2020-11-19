@@ -76,7 +76,7 @@ fn main() -> ! {
 
 ## Features
 
-There is two optional features, `utf8` and `custom-panic-handler`.
+There are two optional features, `utf8` and `custom-panic-handler`.
 
 ### utf8
 
