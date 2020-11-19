@@ -73,11 +73,30 @@
 //! ```
 //!
 //! ## Features
-//!
-//! There is one optional feature, `utf8`. This allows the panic message to be returned
+//! 
+//! There is two optional features, `utf8` and `custom-panic-handler`.
+//! 
+//! ### utf8
+//! 
+//! This allows the panic message to be returned
 //! as a `&str` rather than `&[u8]`, for easier printing. As this requires the ability
 //! to validate the UTF-8 string (to ensure it wasn't truncated mid-character), it may
 //! increase code size usage, and is by default off.
+//! 
+//! ### custom-panic-handler
+//! 
+//! This disables the panic handler from this library so that any user can implement their own.
+//! To persist panic messages, the function `report_panic_info` is made available;
+//! 
+//! ```rust
+//! // My custom panic implementation
+//! #[panic_handler]
+//! fn panic(info: &PanicInfo) -> ! {
+//!     // ...
+//!     panic_persist::report_panic_info(info);
+//!     // ...
+//! }
+//! ```
 
 #![allow(clippy::empty_loop)]
 #![deny(missing_docs)]
@@ -88,8 +107,6 @@ use core::cmp::min;
 use core::fmt::Write;
 use core::mem::size_of;
 use core::panic::PanicInfo;
-
-use cortex_m::interrupt;
 
 struct Ram {
     offset: usize,
@@ -220,9 +237,18 @@ pub fn get_panic_message_utf8() -> Option<&'static str> {
     }
 }
 
+/// Report the panic so the message is persisted.
+///
+/// This function is used in custom panic handlers.
+#[cfg(feature = "custom-panic-handler")]
+pub fn report_panic_info(info: &PanicInfo) {
+    writeln!(Ram { offset: 0 }, "{}", info).ok();
+}
+
+#[cfg(not(feature = "custom-panic-handler"))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    interrupt::disable();
+    cortex_m::interrupt::disable();
 
     writeln!(Ram { offset: 0 }, "{}", info).ok();
 

@@ -20,6 +20,7 @@ cortex-m = "0.6.0"
 [features]
 default = []
 utf8 = []
+custom-panic-handler = []
 
 [package.metadata.docs.rs]
 all-features = true

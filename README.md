@@ -76,10 +76,29 @@ fn main() -> ! {
 
 ## Features
 
-There is one optional feature, `utf8`. This allows the panic message to be returned
+There is two optional features, `utf8` and `custom-panic-handler`.
+
+### utf8
+
+This allows the panic message to be returned
 as a `&str` rather than `&[u8]`, for easier printing. As this requires the ability
 to validate the UTF-8 string (to ensure it wasn't truncated mid-character), it may
 increase code size usage, and is by default off.
+
+### custom-panic-handler
+
+This disables the panic handler from this library so that any user can implement their own.
+To persist panic messages, the function `report_panic_info` is made available;
+
+```rust
+// My custom panic implementation
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    // ...
+    panic_persist::report_panic_info(info);
+    // ...
+}
+```
 
 ## Provenance
 
