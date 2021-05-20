@@ -104,7 +104,7 @@ fn panic(info: &PanicInfo) -> ! {
 
 This crate was inspired (and forked from) the [`panic-ramdump`] crate.
 
-[`panic-ramdump`](https://github.com/therealprof/panic-ramdump)
+[`panic-ramdump`]: https://github.com/therealprof/panic-ramdump
 
 ## License
 
