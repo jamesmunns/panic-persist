@@ -73,21 +73,21 @@
 //! ```
 //!
 //! ## Features
-//! 
+//!
 //! There are two optional features, `utf8` and `custom-panic-handler`.
-//! 
+//!
 //! ### utf8
-//! 
+//!
 //! This allows the panic message to be returned
 //! as a `&str` rather than `&[u8]`, for easier printing. As this requires the ability
 //! to validate the UTF-8 string (to ensure it wasn't truncated mid-character), it may
 //! increase code size usage, and is by default off.
-//! 
+//!
 //! ### custom-panic-handler
-//! 
+//!
 //! This disables the panic handler from this library so that any user can implement their own.
 //! To persist panic messages, the function `report_panic_info` is made available;
-//! 
+//!
 //! ```rust
 //! // My custom panic implementation
 //! #[panic_handler]
@@ -250,6 +250,14 @@ pub fn report_panic_info(info: &PanicInfo) {
 fn panic(info: &PanicInfo) -> ! {
     cortex_m::interrupt::disable();
 
+    #[cfg(feature = "min-panic")]
+    if let Some(location) = info.location() {
+        writeln!(Ram { offset: 0 }, "Panicked at {}", location).ok();
+    } else {
+        writeln!(Ram { offset: 0 }, "Panic occured!").ok();
+    }
+
+    #[cfg(not(feature = "min-panic"))]
     writeln!(Ram { offset: 0 }, "{}", info).ok();
 
     cortex_m::peripheral::SCB::sys_reset();
