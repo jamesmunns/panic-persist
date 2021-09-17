@@ -74,7 +74,7 @@
 //!
 //! ## Features
 //!
-//! There are two optional features, `utf8` and `custom-panic-handler`.
+//! There are a few optional features, `utf8` and `custom-panic-handler`.
 //!
 //! ### utf8
 //!
@@ -97,6 +97,10 @@
 //!     // ...
 //! }
 //! ```
+//!
+//! ### min-panic
+//!
+//! This prints a smaller, line-number-only message, in order to reduce space needed when persisting panics, at a loss of some context.
 
 #![allow(clippy::empty_loop)]
 #![deny(missing_docs)]

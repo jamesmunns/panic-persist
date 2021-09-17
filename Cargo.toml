@@ -2,7 +2,6 @@
 edition = "2018"
 authors = [
     "James Munns <james.munns@ferrous-systems.com>",
-    "Daniel Egger <daniel@eggers-club.de>",
 ]
 categories = ["embedded", "no-std"]
 description = "Persist panic messages in the targets' RAM"
@@ -11,7 +10,7 @@ keywords = ["panic-handler", "panic-impl", "panic", "persist"]
 license = "MIT OR Apache-2.0"
 name = "panic-persist"
 repository = "https://github.com/jamesmunns/panic-persist"
-version = "0.2.1"
+version = "0.3.0"
 readme = "README.md"
 
 [dependencies]

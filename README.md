@@ -76,7 +76,7 @@ fn main() -> ! {
 
 ## Features
 
-There are two optional features, `utf8` and `custom-panic-handler`.
+There are a few optional features, `utf8` and `custom-panic-handler`.
 
 ### utf8
 
@@ -99,6 +99,10 @@ fn panic(info: &PanicInfo) -> ! {
     // ...
 }
 ```
+
+### min-panic
+
+This prints a smaller, line-number-only message, in order to reduce space needed when persisting panics, at a loss of some context.
 
 ## Provenance
 
